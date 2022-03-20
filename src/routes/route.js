@@ -1,25 +1,45 @@
 const express = require('express');
 const router = express.Router();
-// const UserModel= require("../models/userModel.js")
-const UserController= require("../controllers/userController")
-const BookController= require("../controllers/bookController")
+const AuthorController = require('../controllers/authorController')
+const BlogsController = require('../controllers/blogControllers')
+const AuthMiddleWare = require('../middleWare/auth')
 
-router.get("/test-me", function (req, res) {
-    res.send("My first ever api!")
+// test-api
+router.get('/test', function(req, res){
+    res.status(200).send({status: true, message: "test api working fine"})
 })
 
+//* Create author
+router.post('/authors', AuthorController.createAuthor)
 
-router.post("/createUser", UserController.createUser  )
+//* login
+router.post('/login', AuthorController.login)
 
-router.get("/getUsersData", UserController.getUsersData)
+//* Create blogs
+router.post('/blogs', AuthMiddleWare.authentication, BlogsController.createBlogs )
+
+//* Get blogs 
+router.get('/blogs', AuthMiddleWare.authentication, BlogsController.getFilteredBlogs)
+
+//* Update blogs
+router.put('/blogs/:blogId', AuthMiddleWare.authentication, AuthMiddleWare.authorization, BlogsController.updateBlog)
+
+//* Deleted blogs by path params
+router.delete('/blogs/:blogId',AuthMiddleWare.authentication, AuthMiddleWare.authorization, BlogsController.deleteBlog)
+
+//* Deleted blogs by query params
+router.delete('/blogs', AuthMiddleWare.authentication, BlogsController.deleteFilteredBlog)
+
+
+module.exports = router;
 
 
 
-router.post("/createBook", BookController.createBook  )
-router.get("/bookList", BookController.bookList)
-router.get("/getBooksInYear", BookController.getBooksInYear)
-router.get("/getParticularBooks", BookController.getParticularBooks)
-router.get("/getXINRBooks", BookController.getXINRBooks)
-router.get("/getRandomBooks", BookController.getRandomBooks)
+
+
+
+
+
+  
 
 module.exports = router;
