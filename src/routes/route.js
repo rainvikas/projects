@@ -34,12 +34,3 @@ router.delete('/blogs', AuthMiddleWare.authentication, BlogsController.deleteFil
 module.exports = router;
 
 
-
-
-
-
-
-
-  
-
-module.exports = router;

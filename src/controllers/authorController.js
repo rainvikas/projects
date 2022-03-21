@@ -67,8 +67,16 @@ const createAuthor = async function (req, res) {
     }
 }
 
+
 const login = async function (req, res) {
     try {
+
+        let email = req.body.email
+        let password = req.body.password
+        let body= req.body
+        if(Object.keys(body).length==0){
+            res.status(400).send({status: false, msg: "BAD REQUEST"})
+        }
         if (!isValid(email)) {
             res.status(400).send({ status: false, msg: "email is required" })
             return
@@ -82,15 +90,10 @@ const login = async function (req, res) {
             return
         }
 
-        let username = req.body.email
-        let password = req.body.password
+        let author = await AuthorModel.findOne({ email: email, password: password })
 
-        if (username && password) {
-
-            let author = await AuthorModel.findOne({ email: username, password: password })
-
-            if (!author) return res.status(404).send({ status: false, msg: "email or password does not exist" })
-
+        if (!author) return res.status(404).send({ status: false, msg: "email or password does not match" })
+        else {
             let payLoad = { authorId: author._id }
 
             let secret = "projectgroup3"
@@ -98,11 +101,9 @@ const login = async function (req, res) {
             let token = jwt.sign(payLoad, secret)
 
             res.status(200).send({ status: true, data: token })
-
-        } else {
-
-            res.status(400).send({ status: false, msg: "Please provide username and password in request body" })
         }
+
+
 
     } catch (error) {
         res.status(500).send({ error: error.message })

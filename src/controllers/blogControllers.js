@@ -144,12 +144,11 @@ const updateBlog = async function (req, res) {
 
         if (blogData.subcategory.includes(newSubCategory) == true) res.status(400).send({ status: false, msg: "subcategory already present" })
 
-        let blog = await BlogsModel.findByIdAndUpdate(
+        let blog = await BlogsModel.findOneAndUpdate(
             { _id: id },
-            {
-                $set: { title: newTitle, body: newBody, isPublished: true, publishedAt: Date.now() },
-                $push: { tags: newTag, subcategory: newSubCategory }
-            },
+            
+               { $set: { title: newTitle, body: newBody},$push: { tags: newTag, subcategory: newSubCategory } ,isPublished: true, publishedAt: Date.now() },
+            
             { new: true })
 
         res.status(200).send({ status: true, data: blog })
@@ -220,15 +219,18 @@ const deleteFilteredBlog = async function (req, res) {
             filtersAsObjectArray.push(obj)
         }
 
-        let conditions = [{ isDeleted: false }, { isPublished: false }]
+        let conditions = [{ isDeleted: false , isPublished: false }]
         let finalFilters = conditions.concat(filtersAsObjectArray)   // [{a:'abc'} , {b:'def'}]
 
         let deleteBlog = await BlogsModel.updateMany({ $and: finalFilters },
             { $set: { isDeleted: true, deletedAt: Date.now() } },
             { new: true })
-        if (deleteBlog.modifiedCount == 0) return res.status(404).send({ status: false, msg: "No document present" })
-
-        res.status(200).send({ status: true, data: deleteBlog })
+        if (deleteBlog.modifiedCount == 0) {
+         return res.status(404).send({ status: false, msg: "No document present" })
+        }
+        else{
+        res.status(201).send({ status: true, data: deleteBlog })
+        }
 
     }
     catch (error) {
